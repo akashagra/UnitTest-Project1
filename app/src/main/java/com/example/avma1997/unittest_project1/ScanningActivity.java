@@ -33,89 +33,90 @@ public class ScanningActivity extends AppCompatActivity {
                 != PackageManager.PERMISSION_GRANTED) {
 
 
+            ActivityCompat.requestPermissions(ScanningActivity.this,
+                    new String[]{Manifest.permission.CAMERA},
+                    5);
 
-                ActivityCompat.requestPermissions(ScanningActivity.this,
-                        new String[]{Manifest.permission.CAMERA},
-                        5);
 
-            }
+        } else {
+            loadScanningActivity();
         }
 
-
+    }
 
 
     public void onRequestPermissionsResult(int requestCode,
                                            String permissions[], int[] grantResults) {
         switch (requestCode) {
             case 5: {
-                // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    setContentView(R.layout.activity_scanning);
-                    cameraView = (SurfaceView) findViewById(R.id.camera_view);
-                    barcodeInfo = (TextView) findViewById(R.id.code_info);
-
-                    barcodeDetector =
-                            new BarcodeDetector.Builder(this)
-                                    .setBarcodeFormats(Barcode.QR_CODE)
-                                    .build();
-
-                    cameraSource = new CameraSource
-                            .Builder(this, barcodeDetector)
-                            .setRequestedPreviewSize(640, 480)
-                            .build();
-                    cameraView.getHolder().addCallback(new SurfaceHolder.Callback() {
-                        @Override
-                        public void surfaceCreated(SurfaceHolder holder) {
-                            try {
-                                cameraSource.start(cameraView.getHolder());
-                            } catch (IOException ie) {
-                                Log.e("CAMERA SOURCE", ie.getMessage());
-                            }
-                        }
-
-                        @Override
-                        public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-                        }
-
-                        @Override
-                        public void surfaceDestroyed(SurfaceHolder holder) {
-                            cameraSource.stop();
-                        }
-                    });
-                    barcodeDetector.setProcessor(new Detector.Processor<Barcode>() {
-                        @Override
-                        public void release() {
-                        }
-                        public void receiveDetections(Detector.Detections<Barcode> detections) {
-                            final SparseArray<Barcode> barcodes = detections.getDetectedItems();
-
-                            if (barcodes.size() != 0) {
-                                barcodeInfo.post(new Runnable() {    // Use the post method of the TextView
-                                    public void run() {
-                                        barcodeInfo.setText(    // Update the TextView
-                                                barcodes.valueAt(0).displayValue
-                                        );
-                                    }
-                                });
-                            }
-                        }
-                    });
-
-
-                }
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {         // If request is cancelled, the result arrays are empty.
+                loadScanningActivity();}
+                else
+                {finish();}
 
 
 
-                 else {
-
-                    finish();
-                }
-                return;
+                // other 'case' lines to check for other
+                // permissions this app might request
             }
-
-            // other 'case' lines to check for other
-            // permissions this app might request
         }
     }
-}
+
+    public void loadScanningActivity() {
+
+            setContentView(R.layout.activity_scanning);
+            cameraView = (SurfaceView) findViewById(R.id.camera_view);
+            barcodeInfo = (TextView) findViewById(R.id.code_info);
+
+            barcodeDetector =
+                    new BarcodeDetector.Builder(this)
+                            .setBarcodeFormats(Barcode.QR_CODE)
+                            .build();
+
+            cameraSource = new CameraSource
+                    .Builder(this, barcodeDetector)
+                    .setRequestedPreviewSize(640, 480)
+                    .build();
+            cameraView.getHolder().addCallback(new SurfaceHolder.Callback() {
+                @Override
+                public void surfaceCreated(SurfaceHolder holder) {
+                    try {
+                        cameraSource.start(cameraView.getHolder());
+                    } catch (IOException ie) {
+                        Log.e("CAMERA SOURCE", ie.getMessage());
+                    }
+                }
+
+                @Override
+                public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+                }
+
+                @Override
+                public void surfaceDestroyed(SurfaceHolder holder) {
+                    cameraSource.stop();
+                }
+            });
+            barcodeDetector.setProcessor(new Detector.Processor<Barcode>() {
+                @Override
+                public void release() {
+                }
+
+                public void receiveDetections(Detector.Detections<Barcode> detections) {
+                    final SparseArray<Barcode> barcodes = detections.getDetectedItems();
+
+                    if (barcodes.size() != 0) {
+                        barcodeInfo.post(new Runnable() {    // Use the post method of the TextView
+                            public void run() {
+                                barcodeInfo.setText(    // Update the TextView
+                                        barcodes.valueAt(0).displayValue
+                                );
+                            }
+                        });
+                    }
+                }
+            });
+
+
+        }
+    }
