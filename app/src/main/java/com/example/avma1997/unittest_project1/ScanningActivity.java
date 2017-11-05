@@ -19,12 +19,13 @@ import com.google.android.gms.vision.barcode.BarcodeDetector;
 
 import java.io.IOException;
 
+import dalvik.annotation.TestTarget;
+
 public class ScanningActivity extends AppCompatActivity {
     SurfaceView cameraView;
     TextView barcodeInfo;
     BarcodeDetector barcodeDetector;
     CameraSource cameraSource;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
